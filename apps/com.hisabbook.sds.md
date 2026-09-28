@@ -5,6 +5,7 @@
 - **Rating:** ⭐ 0.0 (0 ratings | 0 reviews)
 - **Installs:** 100+
 - **Current Version:** `Varies with device`
+- **Initial Launch Date:** Aug 19, 2026
 - **Last Updated Date:** None
 - **Play Store Link:** [Open in Google Play](https://play.google.com/store/apps/details?id=com.hisabbook.sds&hl=en&gl=in)
 
