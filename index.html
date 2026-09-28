@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Doodh Ka Hisab - Competitor Intelligence Radar</title>
+  <title>Play Store Multi-Category Competitor Radar</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Inter -->
@@ -35,11 +35,11 @@
   <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-blue-500/20">
-          🥛
+        <div id="headerIcon" class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-blue-500/20">
+          📊
         </div>
         <div>
-          <h1 class="text-base font-extrabold text-slate-900 leading-tight">Doodh Hisab Radar</h1>
+          <h1 id="headerTitle" class="text-base font-extrabold text-slate-900 leading-tight">Competitor Radar</h1>
           <p class="text-xs text-slate-500 flex items-center space-x-1">
             <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
             <span id="lastUpdatedHeader">Tracking Active</span>
@@ -84,9 +84,9 @@
         </div>
       </div>
       <div class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Reviews</span>
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">1⭐ Complaints</span>
         <div class="flex items-baseline space-x-1 mt-1">
-          <span id="statTotalReviews" class="text-xl sm:text-3xl font-extrabold text-amber-500">--</span>
+          <span id="statTotalReviews" class="text-xl sm:text-3xl font-extrabold text-rose-600">--</span>
           <span class="text-[10px] text-slate-400 font-medium hidden sm:inline">captured</span>
         </div>
       </div>
@@ -101,7 +101,7 @@
         🔄 Daily Updates (<span id="tabCountChanges">0</span>)
       </button>
       <button onclick="switchTab('reviews')" id="tabBtn-reviews" class="flex-1 py-2 rounded-xl transition hover:text-slate-900 text-center">
-        💬 User Reviews (<span id="tabCountReviews">0</span>)
+        🔥 1⭐ Complaints (<span id="tabCountReviews">0</span>)
       </button>
     </div>
 
@@ -149,13 +149,13 @@
       </div>
     </section>
 
-    <!-- TAB 3: USER REVIEWS & COMPLAINTS -->
+    <!-- TAB 3: 1-STAR USER COMPLAINTS -->
     <section id="tab-reviews" class="hidden space-y-3">
       <!-- Filter Chips -->
       <div class="flex items-center space-x-2 overflow-x-auto pb-1 text-xs font-semibold">
-        <button onclick="filterReviews('all')" id="chip-all" class="px-3 py-1.5 rounded-full bg-slate-900 text-white whitespace-nowrap shadow-sm">All Reviews</button>
-        <button onclick="filterReviews('critical')" id="chip-critical" class="px-3 py-1.5 rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200 whitespace-nowrap">🔥 1⭐ & 2⭐ Complaints</button>
-        <button onclick="filterReviews('positive')" id="chip-positive" class="px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700 hover:bg-emerald-200 whitespace-nowrap">⭐ 4⭐ & 5⭐ Praise</button>
+        <button onclick="filterReviews('all')" id="chip-all" class="px-3 py-1.5 rounded-full bg-slate-900 text-white whitespace-nowrap shadow-sm">All 1⭐ Complaints</button>
+        <button onclick="filterReviews('replied')" id="chip-replied" class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">👨‍💻 Dev Replied</button>
+        <button onclick="filterReviews('helpful')" id="chip-helpful" class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">👍 Most Upvoted</button>
       </div>
 
       <!-- Reviews Feed -->
@@ -163,7 +163,7 @@
         <!-- Reviews injected via JS -->
       </div>
       <div id="noReviewsMessage" class="hidden text-center py-12 text-slate-400">
-        No reviews matching this filter.
+        No 1-star complaints matching this filter.
       </div>
     </section>
 
@@ -305,6 +305,19 @@
       const categories = appData.categories || [];
       const found = categories.find(c => c.id === catId);
       document.getElementById('activeCategoryLabel').innerText = found ? `${found.icon} ${found.name}` : 'All Categories';
+      
+      const headerIconEl = document.getElementById('headerIcon');
+      const headerTitleEl = document.getElementById('headerTitle');
+      if (headerIconEl && headerTitleEl) {
+        if (found) {
+          headerIconEl.innerText = found.icon;
+          headerTitleEl.innerText = found.name;
+        } else {
+          headerIconEl.innerText = '📊';
+          headerTitleEl.innerText = 'Competitor Radar';
+        }
+      }
+
       renderCategoryPills();
       renderDashboard();
     }
@@ -452,10 +465,10 @@
       feed.innerHTML = '';
 
       let filtered = reviews || [];
-      if (currentReviewFilter === 'critical') {
-        filtered = filtered.filter(r => (r.score || 0) <= 2);
-      } else if (currentReviewFilter === 'positive') {
-        filtered = filtered.filter(r => (r.score || 0) >= 4);
+      if (currentReviewFilter === 'replied') {
+        filtered = filtered.filter(r => r.developer_reply);
+      } else if (currentReviewFilter === 'helpful') {
+        filtered = filtered.filter(r => (r.thumbs_up_count || 0) > 0);
       }
 
       if (filtered.length === 0) {
@@ -466,24 +479,23 @@
 
       filtered.forEach(r => {
         const item = document.createElement('div');
-        item.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2.5 text-xs overflow-hidden";
+        item.className = "bg-white p-4 rounded-2xl border border-rose-100/90 shadow-sm space-y-2.5 text-xs overflow-hidden";
         
-        const stars = '⭐'.repeat(r.score || 1);
         const thumbs = r.thumbs_up_count ? `👍 ${r.thumbs_up_count} helpful` : '';
         const version = r.app_version ? `(v${r.app_version})` : '';
 
         item.innerHTML = `
-          <!-- Prominent App Header Banner -->
-          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 -mx-4 -mt-4 p-3 rounded-t-2xl border-b border-blue-100 flex items-center justify-between">
+          <!-- Prominent 1-Star Complaint Header Banner -->
+          <div class="bg-gradient-to-r from-rose-50 via-rose-100/40 to-orange-50 -mx-4 -mt-4 p-3 rounded-t-2xl border-b border-rose-100 flex items-center justify-between">
             <div class="flex items-center space-x-2 min-w-0">
-              <span class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-xs flex-shrink-0">📱</span>
+              <span class="w-7 h-7 rounded-lg bg-rose-600 text-white flex items-center justify-center text-xs font-bold shadow-xs flex-shrink-0">🔥</span>
               <div class="min-w-0">
-                <span class="text-[9px] uppercase tracking-wider font-extrabold text-blue-600 block">Review for App:</span>
+                <span class="text-[9px] uppercase tracking-wider font-extrabold text-rose-600 block">1⭐ Competitor Complaint:</span>
                 <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm truncate" title="${r.app_title || r.app_id}">${r.app_title || r.app_id}</h4>
               </div>
             </div>
             <div class="text-right flex-shrink-0">
-              <span class="text-amber-500 font-extrabold bg-white px-2 py-0.5 rounded-lg border border-amber-200 text-xs shadow-xs">${stars}</span>
+              <span class="text-rose-600 font-extrabold bg-white px-2 py-0.5 rounded-lg border border-rose-200 text-xs shadow-xs">⭐ 1-Star</span>
             </div>
           </div>
 
@@ -494,18 +506,18 @@
           </div>
 
           <!-- Review Content -->
-          <p class="text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-200/70 text-xs leading-relaxed italic">
+          <p class="text-slate-800 bg-rose-50/40 p-3 rounded-xl border border-rose-100 text-xs leading-relaxed italic">
             "${r.content || 'No text review'}"
           </p>
 
           <!-- Developer Reply if any -->
           ${r.developer_reply ? `
-            <div class="bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-200 text-emerald-950 text-[11px]">
+            <div class="bg-slate-100 p-2.5 rounded-xl border border-slate-200 text-slate-800 text-[11px]">
               <span class="font-bold flex items-center space-x-1">
                 <span>👨‍💻 Developer Reply</span>
-                <span class="text-[10px] text-emerald-600 font-normal">(${(r.reply_date || '').slice(0, 10)})</span>
+                <span class="text-[10px] text-slate-500 font-normal">(${(r.reply_date || '').slice(0, 10)})</span>
               </span>
-              <p class="mt-1">${r.developer_reply}</p>
+              <p class="mt-1 text-slate-600">${r.developer_reply}</p>
             </div>
           ` : ''}
 
@@ -561,12 +573,14 @@
 
     function filterReviews(filter) {
       currentReviewFilter = filter;
-      ['all', 'critical', 'positive'].forEach(f => {
+      ['all', 'replied', 'helpful'].forEach(f => {
         const chip = document.getElementById(`chip-${f}`);
+        if (!chip) return;
         chip.className = "px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-semibold " +
           (f === filter ? "bg-slate-900 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200");
       });
-      renderReviews(appData.reviews);
+      const { filteredReviews } = getFilteredData();
+      renderReviews(filteredReviews);
     }
 
     function openModal(app) {

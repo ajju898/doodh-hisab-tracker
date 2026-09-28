@@ -8,6 +8,7 @@ from dairy_tracker_db import (
     get_all_tracked_apps,
     get_summary_stats
 )
+from dairy_tracker_config import CATEGORIES
 
 BASE_DIR = Path(__file__).resolve().parent
 APPS_DIR = BASE_DIR / "apps"
@@ -38,11 +39,11 @@ def generate_apps_section() -> str:
             description = app["description"] or "No description provided."
             url = app["url"]
             
-            # Fetch reviews for this app with full metadata
+            # Fetch reviews for this app with full metadata (1-star only)
             cursor.execute("""
                 SELECT user_name, score, content, review_created_at, thumbs_up_count, app_version, developer_reply, reply_date
                 FROM reviews
-                WHERE app_id = ?
+                WHERE app_id = ? AND score = 1
                 ORDER BY detected_at DESC
                 LIMIT 20
             """, (app_id,))
@@ -87,7 +88,7 @@ def generate_apps_section() -> str:
             
         app_md_content.extend([
             "",
-            "## 💬 Detailed User Reviews & Feedback",
+            "## 🔥 1-Star User Complaints & Pain Points",
         ])
         
         if recent_reviews:
@@ -124,12 +125,15 @@ def generate_apps_section() -> str:
     master_lines = [
         "# 📱 Tracked Competitor Apps List",
         "",
-        f"Currently tracking **{len(apps)} active apps** in the Doodh Ka Hisab / Dairy category.",
+        f"Currently tracking **{len(apps)} active apps** across {len(CATEGORIES)} categories.",
         "",
-        "| App Name | Developer | Rating ⭐ | Installs | Version | Launch Date | Last Updated | Details |",
-        "|---|---|---|---|---|---|---|---|"
+        "| Category | App Name | Developer | Rating ⭐ | Installs | Version | Launch Date | Last Updated | Details |",
+        "|---|---|---|---|---|---|---|---|---|"
     ]
     for app in apps:
+        cat_id = app.get("category") or "dairy"
+        cat_info = CATEGORIES.get(cat_id, {})
+        cat_badge = f"{cat_info.get('icon', '📱')} {cat_info.get('name', cat_id)}"
         title = app["title"].replace("|", "-")
         dev = app["developer"].replace("|", "-")
         score = app["score"] or 0.0
@@ -139,7 +143,7 @@ def generate_apps_section() -> str:
         updated = str(app["last_updated"])[:10]
         app_id = app["app_id"]
         detail_link = f"[{title}](./{app_id}.md)"
-        master_lines.append(f"| {detail_link} | {dev} | {score} ⭐ | {installs} | `{version}` | {rel_date} | {updated} | [View Details](./{app_id}.md) |")
+        master_lines.append(f"| {cat_badge} | {detail_link} | {dev} | {score} ⭐ | {installs} | `{version}` | {rel_date} | {updated} | [View Details](./{app_id}.md) |")
         
     master_file = APPS_DIR / "README.md"
     with open(master_file, "w", encoding="utf-8") as f:
@@ -163,11 +167,12 @@ def generate_changes_section() -> str:
         """)
         all_changes = cursor.fetchall()
         
-        # Get recently captured reviews
+        # Get recently captured 1-star reviews
         cursor.execute("""
             SELECT r.app_id, t.title, r.user_name, r.score, r.content, r.detected_at
             FROM reviews r
             LEFT JOIN tracked_apps t ON r.app_id = t.app_id
+            WHERE r.score = 1
             ORDER BY r.detected_at DESC
             LIMIT 50
         """)
@@ -194,7 +199,7 @@ def generate_changes_section() -> str:
         
     changes_lines.extend([
         "",
-        "## 💬 New User Reviews & Complaints",
+        "## 🔥 New 1-Star Competitor Complaints",
     ])
     
     if recent_reviews:
@@ -225,12 +230,21 @@ def generate_root_readme():
     
     apps = get_all_tracked_apps()
     
+    cat_lines = []
+    for cid, cinfo in CATEGORIES.items():
+        cnt = sum(1 for a in apps if a.get("category") == cid)
+        cat_lines.append(f"- {cinfo.get('icon', '📱')} **{cinfo.get('name', cid)}**: `{cnt}` apps tracked")
+
     readme = [
-        "# 🥛 Doodh Ka Hisab - Competitor Intelligence Tracker",
+        "# 📊 Play Store Competitor Intelligence Radar",
         "",
-        "> Automated 24/7 competitor radar for the **Dairy & Milk Ledger** Android ecosystem.",
+        "> Automated 24/7 competitor radar and market intelligence tracker across multiple Play Store categories.",
         "",
-        "## 📊 Live Category Dashboard",
+        "## 📂 Monitored Categories",
+        "",
+        *cat_lines,
+        "",
+        "## 📊 Live System Metrics",
         "",
         f"- 🔍 **Total Discovered Apps:** `{stats['total_discovered']}`",
         f"- ⏳ **Pending in Discovery Pool:** `{stats['pending_discovery']}`",
@@ -243,25 +257,28 @@ def generate_root_readme():
         "",
         "## 📂 Repository Navigation",
         "",
-        "- [**📱 Apps Directory (`apps/`)**](./apps/README.md) — Master list of all tracked competitor apps with version numbers, install counts, ratings, and in-depth details.",
+        "- [**📱 Apps Directory (`apps/`)**](./apps/README.md) — Master list of all tracked competitor apps with category badges, versions, installs, ratings, and launch dates.",
         "- [**🔄 Changes Directory (`changes/`)**](./changes/README.md) — Daily logs of updates, version bumps, changelog changes, and new user reviews.",
         "",
         "---",
         "",
         "## 📱 Top Competitors Overview",
         "",
-        "| App Name | Developer | Rating ⭐ | Installs | Version | Details |",
-        "|---|---|---|---|---|---|"
+        "| Category | App Name | Developer | Rating ⭐ | Installs | Version | Details |",
+        "|---|---|---|---|---|---|---|"
     ]
     
     for app in apps[:15]:
+        cat_id = app.get("category") or "dairy"
+        cat_info = CATEGORIES.get(cat_id, {})
+        cat_badge = f"{cat_info.get('icon', '📱')} {cat_info.get('name', cat_id)}"
         title = app["title"].replace("|", "-")
         dev = app["developer"].replace("|", "-")
         score = app["score"] or 0.0
         installs = app["installs"] or "N/A"
         version = app["version"] or "N/A"
         app_id = app["app_id"]
-        readme.append(f"| [{title}](./apps/{app_id}.md) | {dev} | {score} ⭐ | {installs} | `{version}` | [Read Details](./apps/{app_id}.md) |")
+        readme.append(f"| {cat_badge} | [{title}](./apps/{app_id}.md) | {dev} | {score} ⭐ | {installs} | `{version}` | [Read Details](./apps/{app_id}.md) |")
         
     if len(apps) > 15:
         readme.append(f"\n*(Showing top 15 of {len(apps)} apps. See full list in [**apps/README.md**](./apps/README.md))*")
@@ -272,11 +289,11 @@ def generate_root_readme():
         "",
         "## ⚙️ How It Works",
         "",
-        "1. **Discovery Pool**: Scans Indian Play Store for dairy/milk management keywords.",
-        "2. **Daily 10 Ingestion**: Promotes 10 pending apps each day until the whole category is covered.",
+        "1. **Discovery Pool**: Scans Google Play Store for configured keywords across all categories.",
+        "2. **Full Tracking Ingestion**: Promotes discovered apps to active 24/7 tracking.",
         "3. **Change Detection**: Captures version bumps, release notes, rating shifts, and new customer reviews.",
         "4. **Telegram Alerts**: Sends instant alerts to the linked Telegram channel/bot.",
-        "5. **GitHub Sync**: Automatically updates this repository via GitHub Actions daily."
+        "5. **GitHub Sync**: Automatically updates this repository and GitHub Pages dashboard daily."
     ])
     
     root_file = BASE_DIR / "README.md"
@@ -316,13 +333,14 @@ def generate_web_dashboard_data():
         """)
         changes = [dict(row) for row in cursor.fetchall()]
         
-        # Recent detailed reviews
+        # Recent 1-star detailed reviews/complaints
         cursor.execute("""
             SELECT r.review_id, r.app_id, t.title as app_title, t.category, r.user_name, r.score,
                    r.content, r.review_created_at, r.thumbs_up_count, r.app_version,
                    r.developer_reply, r.reply_date, r.detected_at
             FROM reviews r
             LEFT JOIN tracked_apps t ON r.app_id = t.app_id
+            WHERE r.score = 1
             ORDER BY r.detected_at DESC
             LIMIT 500
         """)

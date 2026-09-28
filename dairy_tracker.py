@@ -136,7 +136,7 @@ def run_scan_updates() -> int:
     return updates_found
 
 def run_scan_reviews(max_total: int = MAX_REVIEWS_PER_RUN, per_app_limit: int = MAX_REVIEWS_PER_APP) -> int:
-    """Scans for new user reviews across tracked apps, strictly capped at max_total (500) per run with zero repeats."""
+    """Scans for new 1-star user complaints across tracked apps, strictly capped at max_total (500) per run with zero repeats."""
     if not ENABLE_REVIEW_SCRAPING:
         logger.info("ℹ️ Review scraping is currently disabled. Skipping...")
         return 0
@@ -145,12 +145,12 @@ def run_scan_reviews(max_total: int = MAX_REVIEWS_PER_RUN, per_app_limit: int = 
     if not tracked:
         return 0
 
-    logger.info(f"💬 Scanning tracked apps for new user reviews (Limit: max {max_total} new reviews per cycle)...")
+    logger.info(f"🔥 Scanning tracked apps for new 1-STAR user complaints (Limit: max {max_total} 1⭐ reviews per cycle)...")
     captured_reviews = []
     
     for app in tracked:
         if len(captured_reviews) >= max_total:
-            logger.info(f"🎯 Reached batch cap of {max_total} new reviews for this cycle. Next batch will be fetched in next run!")
+            logger.info(f"🎯 Reached batch cap of {max_total} 1⭐ reviews for this cycle. Next batch will be fetched in next run!")
             break
             
         app_id = app["app_id"]
@@ -158,8 +158,10 @@ def run_scan_reviews(max_total: int = MAX_REVIEWS_PER_RUN, per_app_limit: int = 
         app_url = app["url"]
         
         try:
-            reviews = fetch_latest_reviews(app_id, count=per_app_limit)
+            reviews = fetch_latest_reviews(app_id, count=per_app_limit, score=1)
             for r in reviews:
+                if r.get("score") != 1:
+                    continue
                 is_new = record_review_if_new(app_id, r)
                 if is_new:
                     r["app_title"] = title
@@ -168,14 +170,14 @@ def run_scan_reviews(max_total: int = MAX_REVIEWS_PER_RUN, per_app_limit: int = 
                     if len(captured_reviews) >= max_total:
                         break
         except Exception as e:
-            logger.warning(f"Error fetching reviews for {app_id}: {e}")
+            logger.warning(f"Error fetching 1-star reviews for {app_id}: {e}")
                 
         time.sleep(0.15)
         
     if captured_reviews:
         notify_reviews_batch_summary(captured_reviews)
         
-    logger.info(f"✅ Review scan complete! {len(captured_reviews)} new detailed reviews captured and logged.")
+    logger.info(f"✅ Review scan complete! {len(captured_reviews)} new 1-star critical complaints captured and logged.")
     return len(captured_reviews)
 
 def export_to_csv(filename: str = "dairy_competitors_list.csv"):

@@ -12,14 +12,21 @@ except ImportError:
     SCRAPER_AVAILABLE = False
     logger.error("google-play-scraper is not installed. Run: pip install google-play-scraper")
 
-def is_relevant_app(title: str, description: str = "") -> bool:
-    """Checks whether an app is genuinely related to milk/dairy/doodh hisab."""
-    keywords = [
-        "doodh", "milk", "dairy", "dairies", "gwala", "hisab", "khata", 
-        "cattle", "cow", "buffalo", "dairy farm", "fat", "snf", "ledger"
+def is_relevant_app(title: str, query: str = "", description: str = "") -> bool:
+    """Checks whether an app is genuinely relevant to the searched query."""
+    if not query:
+        return True
+    stop_words = {"the", "and", "for", "with", "app", "apps", "free", "best", "new", "top", "game", "games"}
+    query_terms = [
+        w.lower() for w in query.split()
+        if (len(w) >= 2 or any(c.isdigit() for c in w)) and w.lower() not in stop_words
     ]
+    
+    if not query_terms:
+        return True
+        
     combined = (title + " " + description).lower()
-    return any(k in combined for k in keywords)
+    return any(term in combined for term in query_terms)
 
 def search_playstore(keyword: str, n_hits: int = 50) -> List[Dict[str, Any]]:
     """Searches Google Play Store for a given keyword."""
@@ -36,9 +43,9 @@ def search_playstore(keyword: str, n_hits: int = 50) -> List[Dict[str, Any]]:
         filtered = []
         for item in results:
             title = item.get("title", "")
-            app_id = item.get("appId", "")
-            # Filter to ensure it belongs to dairy / milk / hisab category
-            if is_relevant_app(title):
+            desc = item.get("description", "") or item.get("summary", "")
+            # Filter to ensure relevance to the specific category keyword
+            if is_relevant_app(title, query=keyword, description=desc):
                 filtered.append(item)
         return filtered
     except Exception as e:
@@ -61,19 +68,24 @@ def fetch_full_app_details(app_id: str) -> Optional[Dict[str, Any]]:
         logger.warning(f"Could not fetch details for {app_id} (might be delisted or region locked): {e}")
         return None
 
-def fetch_latest_reviews(app_id: str, count: int = 15) -> List[Dict[str, Any]]:
-    """Fetches the newest user reviews for an app."""
+def fetch_latest_reviews(app_id: str, count: int = 15, score: Optional[int] = 1) -> List[Dict[str, Any]]:
+    """Fetches the newest 1-star user reviews/complaints for an app."""
     if not SCRAPER_AVAILABLE:
         return []
         
     try:
-        result, _ = g_reviews(
-            app_id,
-            lang=PLAYSTORE_LANG,
-            country=PLAYSTORE_COUNTRY,
-            sort=Sort.NEWEST,
-            count=count
-        )
+        kwargs = {
+            "lang": PLAYSTORE_LANG,
+            "country": PLAYSTORE_COUNTRY,
+            "sort": Sort.NEWEST,
+            "count": count
+        }
+        if score is not None:
+            kwargs["filter_score_with"] = score
+
+        result, _ = g_reviews(app_id, **kwargs)
+        if score is not None:
+            result = [r for r in result if r.get("score") == score]
         return result
     except Exception as e:
         logger.warning(f"Could not fetch reviews for {app_id}: {e}")
