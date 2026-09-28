@@ -4,16 +4,19 @@
 
 ## 📂 Monitored Categories
 
-- 🥛 **Doodh Ka Hisab (Dairy)**: `162` apps tracked
+- 🥛 **Doodh Ka Hisab (Dairy)**: `344` apps tracked
+- 🎲 **18 Goti / Sholo Guti Game**: `0` apps tracked
+- 👵 **Granny Game (Granny-based)**: `0` apps tracked
+- 🏍️ **Hill Bike Climb Racing**: `0` apps tracked
 
 ## 📊 Live System Metrics
 
-- 🔍 **Total Discovered Apps:** `162`
+- 🔍 **Total Discovered Apps:** `344`
 - ⏳ **Pending in Discovery Pool:** `0`
-- 🚀 **Actively Monitored Competitors:** `162`
-- 💬 **Total User Reviews Captured:** `2279`
+- 🚀 **Actively Monitored Competitors:** `344`
+- 💬 **Total User Reviews Captured:** `2779`
 - 🔄 **Total Updates & Changes Detected:** `1`
-- 🕒 **Last Monitored Cycle:** `2026-09-28 12:46:49`
+- 🕒 **Last Monitored Cycle:** `2026-09-28 13:02:45`
 
 ---
 
@@ -28,23 +31,23 @@
 
 | Category | App Name | Developer | Rating ⭐ | Installs | Version | Details |
 |---|---|---|---|---|---|---|
+| 🥛 Doodh Ka Hisab (Dairy) | [eFootball™](./apps/jp.konami.pesam.md) | KONAMI | 4.479582 ⭐ | 100,000,000+ | `11.0.1` | [Read Details](./apps/jp.konami.pesam.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Gardenscapes](./apps/com.playrix.gardenscapes.md) | Playrix | 4.524541 ⭐ | 500,000,000+ | `9.9.0` | [Read Details](./apps/com.playrix.gardenscapes.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Hill Climb Racing](./apps/com.fingersoft.hillclimb.md) | Fingersoft | 4.0342054 ⭐ | 1,000,000,000+ | `1.71.1` | [Read Details](./apps/com.fingersoft.hillclimb.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Traffic Rider](./apps/com.skgames.trafficrider.md) | skgames | 4.29563 ⭐ | 500,000,000+ | `Varies with device` | [Read Details](./apps/com.skgames.trafficrider.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Hill Climb Racing 2](./apps/com.fingersoft.hcr2.md) | Fingersoft | 4.0300884 ⭐ | 100,000,000+ | `1.74.2` | [Read Details](./apps/com.fingersoft.hcr2.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Granny](./apps/com.dvloper.granny.md) | DVloper | 4.0464025 ⭐ | 500,000,000+ | `1.8.12` | [Read Details](./apps/com.dvloper.granny.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Bike Race：Motorcycle Games](./apps/com.topfreegames.bikeracefreeworld.md) | Wildlife Studios | 4.026206 ⭐ | 100,000,000+ | `8.25.0` | [Read Details](./apps/com.topfreegames.bikeracefreeworld.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Harry Potter: Hogwarts Mystery](./apps/com.tinyco.potter.md) | Jam City, Inc. | 4.4432607 ⭐ | 50,000,000+ | `7.3.0` | [Read Details](./apps/com.tinyco.potter.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Rider – Stunt Bike Racing](./apps/com.ketchapp.rider.md) | Ketchapp | 4.2584066 ⭐ | 100,000,000+ | `3.06.0.07` | [Read Details](./apps/com.ketchapp.rider.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Riding Extreme 3D](./apps/com.ducky.bikehill3d.md) | playducky.com | 4.1646338 ⭐ | 100,000,000+ | `2.10.9` | [Read Details](./apps/com.ducky.bikehill3d.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Granny: Chapter Two](./apps/com.dvloper.grannychaptertwo.md) | DVloper | 4.186903 ⭐ | 100,000,000+ | `1.2.7` | [Read Details](./apps/com.dvloper.grannychaptertwo.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Bike Racing 3D](./apps/com.wordmobiles.bikeRacing.md) | Words Mobile | 4.1297984 ⭐ | 100,000,000+ | `2.12` | [Read Details](./apps/com.wordmobiles.bikeRacing.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [Angry Gran Run - Running Game](./apps/com.aceviral.angrygranrun.md) | Ace Viral | 4.083243 ⭐ | 50,000,000+ | `2.35.0` | [Read Details](./apps/com.aceviral.angrygranrun.md) |
+| 🥛 Doodh Ka Hisab (Dairy) | [MotoGP Guru Racing 25/26](./apps/com.weplay.motogp.md) | Tifansi Pty Ltd | 3.8653288 ⭐ | 10,000,000+ | `15.0.19` | [Read Details](./apps/com.weplay.motogp.md) |
 | 🥛 Doodh Ka Hisab (Dairy) | [Country Delight Milk & Grocery](./apps/app.mycountrydelight.in.countrydelight.md) | Country Delight | 4.4996843 ⭐ | 10,000,000+ | `10.9.86` | [Read Details](./apps/app.mycountrydelight.in.countrydelight.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [bbdaily: Online Milk & Grocery](./apps/com.raincan.android.hybrid.md) | Bigbasket.com | 4.16433 ⭐ | 10,000,000+ | `7.5.11` | [Read Details](./apps/com.raincan.android.hybrid.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Milkbasket: Grocery Delivery](./apps/com.milkbasket.app.md) | Milkbasket | 4.149843 ⭐ | 5,000,000+ | `9.0.7` | [Read Details](./apps/com.milkbasket.app.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Daybook - Diary, Journal, Note](./apps/com.bigheadtechies.diary.md) | Daybook Labs Inc | 4.514045 ⭐ | 1,000,000+ | `6.48.0` | [Read Details](./apps/com.bigheadtechies.diary.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Remember The Milk](./apps/com.rememberthemilk.MobileRTM.md) | Remember The Milk | 4.257426 ⭐ | 1,000,000+ | `4.11.2` | [Read Details](./apps/com.rememberthemilk.MobileRTM.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Doodhvale Farms: Milk Delivery](./apps/com.technologies.subtlelabs.doodhvale.md) | Doodhvale | 3.8445323 ⭐ | 1,000,000+ | `8.4.4` | [Read Details](./apps/com.technologies.subtlelabs.doodhvale.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Milk Farm Tycoon](./apps/com.eastsidegames.milkinc.md) | East Side Games Studio | 3.72549 ⭐ | 500,000+ | `3.11.3` | [Read Details](./apps/com.eastsidegames.milkinc.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Milk Diary & Daily Grocery](./apps/com.ProDataDoctor.MilkDiary.md) | Pro Data Doctor Pvt. Ltd. | 4.5720654 ⭐ | 100,000+ | `2.2` | [Read Details](./apps/com.ProDataDoctor.MilkDiary.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Mobile Dairy Center - Milk App](./apps/dairy.mobile.com.mobiledairy.md) | Mobile Dairy Software | 4.824 ⭐ | 100,000+ | `4.1.3` | [Read Details](./apps/dairy.mobile.com.mobiledairy.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Sid’s Farm - Pure Tested Milk](./apps/com.sidsfarm.customer.md) | Sid's Farm | 4.3266478 ⭐ | 1,000,000+ | `4.3.3` | [Read Details](./apps/com.sidsfarm.customer.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Uzhavarbumi: Pure Cow Milk App](./apps/com.uzhavarbumi.app.md) | Uzhavarbumi: Fresh Cow Milk in Chennai | 4.7284346 ⭐ | 100,000+ | `2.71` | [Read Details](./apps/com.uzhavarbumi.app.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Meri Dairy - MILK APP](./apps/b2infosoft.milkapp.com.md) | B2infosoft | 4.5091743 ⭐ | 100,000+ | `Varies with device` | [Read Details](./apps/b2infosoft.milkapp.com.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Simple Dairy: Dairy Management](./apps/com.gemsessence.milkdairy.md) | Gems Essence | 4.4944444 ⭐ | 50,000+ | `7.612` | [Read Details](./apps/com.gemsessence.milkdairy.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [Cow Master - Herd Management](./apps/com.kelimesoft.suruyonetimi.md) | KelimeSoft | 4.34 ⭐ | 100,000+ | `3.3.0` | [Read Details](./apps/com.kelimesoft.suruyonetimi.md) |
-| 🥛 Doodh Ka Hisab (Dairy) | [MCS - Dairy Billing App](./apps/com.milkcollectionsystem.md) | KANJI PATEL | 4.3381295 ⭐ | 100,000+ | `7.4.5` | [Read Details](./apps/com.milkcollectionsystem.md) |
 
-*(Showing top 15 of 162 apps. See full list in [**apps/README.md**](./apps/README.md))*
+*(Showing top 15 of 344 apps. See full list in [**apps/README.md**](./apps/README.md))*
 
 ---
 
