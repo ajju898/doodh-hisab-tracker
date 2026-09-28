@@ -13,8 +13,10 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 
 # Monitoring & Discovery Settings
-DAILY_NEW_APPS_LIMIT = int(os.getenv("DAILY_NEW_APPS_LIMIT", "10"))
-MAX_REVIEWS_PER_CHECK = int(os.getenv("MAX_REVIEWS_PER_CHECK", "15"))
+DAILY_NEW_APPS_LIMIT = int(os.getenv("DAILY_NEW_APPS_LIMIT", "1000")) # Track all apps
+ENABLE_REVIEW_SCRAPING = os.getenv("ENABLE_REVIEW_SCRAPING", "true").lower() in ("true", "1", "yes")
+MAX_REVIEWS_PER_RUN = int(os.getenv("MAX_REVIEWS_PER_RUN", "500")) # Max 500 reviews per cycle
+MAX_REVIEWS_PER_APP = int(os.getenv("MAX_REVIEWS_PER_APP", "30")) # Per app batch size
 CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "4"))
 
 # Play Store Region & Language for Indian Market

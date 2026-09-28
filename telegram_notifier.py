@@ -92,6 +92,36 @@ def notify_new_review(app_title: str, review: Dict[str, Any], app_url: str):
     ]
     send_telegram_message("\n".join(lines))
 
+def notify_reviews_batch_summary(captured_reviews: List[Dict[str, Any]]):
+    """Sends a summary digest of captured reviews without flooding Telegram."""
+    if not captured_reviews:
+        return
+        
+    total_count = len(captured_reviews)
+    lines = [
+        "💬 <b>NEW REVIEWS BATCH CAPTURED!</b>",
+        f"Captured <b>{total_count} new reviews</b> across competitor apps (Strictly de-duplicated).",
+        "",
+        "🔥 <b>Key User Complaints & Feedback (Competitor Weaknesses):</b>"
+    ]
+    
+    # Highlight low score / critical reviews first (score <= 2) or top reviews
+    critical = [r for r in captured_reviews if (r.get("score") or 5) <= 2]
+    highlights = (critical[:4] if critical else captured_reviews[:4])
+    
+    for r in highlights:
+        app_name = html.escape(r.get("app_title", "Competitor App"))
+        user = html.escape(r.get("userName") or "User")
+        score = r.get("score", 0)
+        stars = "⭐" * int(score) if score else ""
+        content = html.escape((r.get("content") or "").strip()[:180])
+        lines.append(f"• <b>{app_name}</b> ({stars} by <i>{user}</i>):")
+        lines.append(f"  \"{content}\"")
+        lines.append("")
+        
+    lines.append(f"📂 <i>All {total_count} detailed reviews saved to database & GitHub.</i>")
+    send_telegram_message("\n".join(lines))
+
 def notify_daily_batch_added(added_apps: List[Dict[str, Any]], remaining_pool_count: int):
     """Sends a notification when apps are promoted to active tracking."""
     lines = [

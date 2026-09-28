@@ -20,7 +20,9 @@ from dairy_tracker_config import (
     TARGET_KEYWORDS,
     DAILY_NEW_APPS_LIMIT,
     CHECK_INTERVAL_HOURS,
-    MAX_REVIEWS_PER_CHECK,
+    ENABLE_REVIEW_SCRAPING,
+    MAX_REVIEWS_PER_RUN,
+    MAX_REVIEWS_PER_APP,
     DATABASE_PATH
 )
 from dairy_tracker_db import (
@@ -36,6 +38,7 @@ from telegram_notifier import (
     send_telegram_message,
     notify_app_update,
     notify_new_review,
+    notify_reviews_batch_summary,
     notify_daily_batch_added,
     notify_summary,
     test_telegram_connection,
@@ -122,36 +125,48 @@ def run_scan_updates() -> int:
     logger.info(f"✅ Update scan complete! {updates_found} apps had new updates.")
     return updates_found
 
-def run_scan_reviews(max_reviews: int = MAX_REVIEWS_PER_CHECK) -> int:
-    """Scans for new user reviews across all tracked apps."""
+def run_scan_reviews(max_total: int = MAX_REVIEWS_PER_RUN, per_app_limit: int = MAX_REVIEWS_PER_APP) -> int:
+    """Scans for new user reviews across tracked apps, strictly capped at max_total (500) per run with zero repeats."""
+    if not ENABLE_REVIEW_SCRAPING:
+        logger.info("ℹ️ Review scraping is currently disabled. Skipping...")
+        return 0
+
     tracked = get_all_tracked_apps()
     if not tracked:
         return 0
 
-    logger.info(f"💬 Scanning {len(tracked)} tracked apps for new user reviews...")
-    new_reviews_count = 0
+    logger.info(f"💬 Scanning tracked apps for new user reviews (Limit: max {max_total} new reviews per cycle)...")
+    captured_reviews = []
     
     for app in tracked:
+        if len(captured_reviews) >= max_total:
+            logger.info(f"🎯 Reached batch cap of {max_total} new reviews for this cycle. Next batch will be fetched in next run!")
+            break
+            
         app_id = app["app_id"]
         title = app["title"]
         app_url = app["url"]
         
         try:
-            reviews = fetch_latest_reviews(app_id, count=max_reviews)
+            reviews = fetch_latest_reviews(app_id, count=per_app_limit)
             for r in reviews:
                 is_new = record_review_if_new(app_id, r)
                 if is_new:
-                    new_reviews_count += 1
-                    logger.info(f"💬 New review on '{title}': {r.get('score')}⭐ by {r.get('userName')}")
-                    notify_new_review(title, r, app_url)
-                    time.sleep(0.2)
+                    r["app_title"] = title
+                    r["app_url"] = app_url
+                    captured_reviews.append(r)
+                    if len(captured_reviews) >= max_total:
+                        break
         except Exception as e:
             logger.warning(f"Error fetching reviews for {app_id}: {e}")
                 
-        time.sleep(0.2)
+        time.sleep(0.15)
         
-    logger.info(f"✅ Review scan complete! {new_reviews_count} new reviews captured and alerted.")
-    return new_reviews_count
+    if captured_reviews:
+        notify_reviews_batch_summary(captured_reviews)
+        
+    logger.info(f"✅ Review scan complete! {len(captured_reviews)} new detailed reviews captured and logged.")
+    return len(captured_reviews)
 
 def export_to_csv(filename: str = "dairy_competitors_list.csv"):
     """Exports all tracked apps with full details to a clean CSV file."""

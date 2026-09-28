@@ -63,7 +63,7 @@ def init_db():
             )
         """)
         
-        # 4. User reviews tracking
+        # 4. User reviews tracking with full metadata
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS reviews (
                 review_id TEXT PRIMARY KEY,
@@ -72,12 +72,31 @@ def init_db():
                 score INTEGER,
                 content TEXT,
                 review_created_at TEXT,
+                thumbs_up_count INTEGER DEFAULT 0,
+                app_version TEXT DEFAULT '',
+                developer_reply TEXT DEFAULT '',
+                reply_date TEXT DEFAULT '',
                 detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (app_id) REFERENCES tracked_apps(app_id)
             )
         """)
+        
+        # Check and add new columns if table existed from earlier run
+        cursor.execute("PRAGMA table_info(reviews)")
+        existing_cols = [row["name"] for row in cursor.fetchall()]
+        for col_name, col_type in [
+            ("thumbs_up_count", "INTEGER DEFAULT 0"),
+            ("app_version", "TEXT DEFAULT ''"),
+            ("developer_reply", "TEXT DEFAULT ''"),
+            ("reply_date", "TEXT DEFAULT ''")
+        ]:
+            if col_name not in existing_cols:
+                try:
+                    cursor.execute(f"ALTER TABLE reviews ADD COLUMN {col_name} {col_type}")
+                except Exception:
+                    pass
 
-        # 5. Tracking batch history (e.g. daily 10 added)
+        # 5. Tracking batch history (e.g. daily added)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS batch_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -285,7 +304,7 @@ def get_all_tracked_apps() -> List[Dict[str, Any]]:
 
 def record_review_if_new(app_id: str, review: Dict[str, Any]) -> bool:
     """
-    Inserts a review if it hasn't been logged yet.
+    Inserts a review with full metadata if it hasn't been logged yet.
     Returns True if it was newly inserted, False if it was already known.
     """
     review_id = str(review.get("reviewId") or review.get("id") or "")
@@ -296,18 +315,25 @@ def record_review_if_new(app_id: str, review: Dict[str, Any]) -> bool:
         cursor = conn.cursor()
         cursor.execute("SELECT review_id FROM reviews WHERE review_id = ?", (review_id,))
         if cursor.fetchone() is not None:
-            return False
+            return False # Strict deduplication: never repeat
             
         cursor.execute("""
-            INSERT INTO reviews (review_id, app_id, user_name, score, content, review_created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO reviews (
+                review_id, app_id, user_name, score, content,
+                review_created_at, thumbs_up_count, app_version,
+                developer_reply, reply_date
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             review_id,
             app_id,
             review.get("userName") or "Anonymous",
             review.get("score") or 0,
             review.get("content") or "",
-            str(review.get("at") or "")
+            str(review.get("at") or ""),
+            review.get("thumbsUpCount") or 0,
+            str(review.get("reviewCreatedVersion") or ""),
+            str(review.get("replyContent") or ""),
+            str(review.get("repliedAt") or "")
         ))
         conn.commit()
     return True

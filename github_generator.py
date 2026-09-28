@@ -37,13 +37,13 @@ def generate_apps_section() -> str:
             description = app["description"] or "No description provided."
             url = app["url"]
             
-            # Fetch reviews for this app
+            # Fetch reviews for this app with full metadata
             cursor.execute("""
-                SELECT user_name, score, content, review_created_at
+                SELECT user_name, score, content, review_created_at, thumbs_up_count, app_version, developer_reply, reply_date
                 FROM reviews
                 WHERE app_id = ?
                 ORDER BY detected_at DESC
-                LIMIT 10
+                LIMIT 20
             """, (app_id,))
             recent_reviews = cursor.fetchall()
             
@@ -84,15 +84,21 @@ def generate_apps_section() -> str:
             
         app_md_content.extend([
             "",
-            "## 💬 Latest Captured User Reviews",
+            "## 💬 Detailed User Reviews & Feedback",
         ])
         
         if recent_reviews:
             for r in recent_reviews:
                 stars = "⭐" * int(r["score"] or 0)
-                content = r["content"].replace("\n", " ").strip()
-                app_md_content.append(f"- **{stars} by {r['user_name']}** ({r['review_created_at']})")
+                content = (r["content"] or "").replace("\n", " ").strip()
+                thumbs = f" | 👍 {r['thumbs_up_count']} helpful" if r["thumbs_up_count"] else ""
+                version_info = f" (on `{r['app_version']}`)" if r["app_version"] else ""
+                app_md_content.append(f"- **{stars} by {r['user_name']}**{version_info} — *{r['review_created_at']}*{thumbs}")
                 app_md_content.append(f"  > \"{content}\"")
+                if r["developer_reply"]:
+                    dev_reply = r["developer_reply"].replace("\n", " ").strip()
+                    app_md_content.append(f"  > 👨‍💻 *Developer Reply ({r['reply_date']}):* \"{dev_reply}\"")
+                app_md_content.append("")
         else:
             app_md_content.append("*No reviews logged yet.*")
             
