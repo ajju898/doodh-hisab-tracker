@@ -17,5 +17,54 @@
       "gwala dairy",
       "doodh hisab book"
     ]
+  },
+  "18_goti": {
+    "name": "18 Goti / Sholo Guti Game",
+    "icon": "🎲",
+    "description": "18 Goti, 16 Goti, Sholo Guti, Beads 16, and traditional Indian board games",
+    "keywords": [
+      "18 goti",
+      "18 goti game",
+      "16 goti",
+      "16 goti game",
+      "sholo guti",
+      "sholo guti game",
+      "bead 16",
+      "beads 16",
+      "damru game",
+      "sixteen soldiers game",
+      "18 beads game"
+    ]
+  },
+  "granny_horror": {
+    "name": "Granny Game (Granny-based)",
+    "icon": "👵",
+    "description": "Granny horror games, scary granny survival, house escape, and chapters",
+    "keywords": [
+      "granny game",
+      "scary granny",
+      "granny horror",
+      "granny chapter",
+      "granny house escape",
+      "evil granny",
+      "granny remake",
+      "creepy granny game",
+      "granny escape"
+    ]
+  },
+  "hill_bike_racing": {
+    "name": "Hill Bike Climb Racing",
+    "icon": "🏍️",
+    "description": "Hill climb bike racing, moto stunt climbing, uphill mountain bikes, and offroad racing",
+    "keywords": [
+      "hill bike climb racing",
+      "hill climb bike",
+      "moto hill climb",
+      "mountain bike climb racing",
+      "hill bike race",
+      "offroad hill bike climb",
+      "uphill bike racing",
+      "bike hill racing game"
+    ]
   }
 }

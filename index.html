@@ -239,9 +239,17 @@
 
   <!-- Client-Side JavaScript Logic -->
   <script>
+    const DEFAULT_CATEGORIES = [
+      { id: 'dairy', name: 'Doodh Ka Hisab (Dairy)', icon: '🥛', app_count: 0 },
+      { id: '18_goti', name: '18 Goti / Sholo Guti Game', icon: '🎲', app_count: 0 },
+      { id: 'granny_horror', name: 'Granny Game (Granny-based)', icon: '👵', app_count: 0 },
+      { id: 'hill_bike_racing', name: 'Hill Bike Climb Racing', icon: '🏍️', app_count: 0 }
+    ];
+
     let appData = {
-      updated_at: "Just now",
+      updated_at: "Ready to track",
       stats: { actively_tracked: 0, total_updates_detected: 0, total_reviews_captured: 0 },
+      categories: DEFAULT_CATEGORIES,
       apps: [],
       changes: [],
       reviews: []
@@ -255,10 +263,23 @@
       try {
         const response = await fetch('./data.json?t=' + Date.now());
         if (response.ok) {
-          appData = await response.json();
+          const loaded = await response.json();
+          // Merge to ensure all 4 categories always appear even with cached or older data.json
+          const merged = [...DEFAULT_CATEGORIES];
+          if (loaded.categories && Array.isArray(loaded.categories)) {
+            loaded.categories.forEach(cat => {
+              const idx = merged.findIndex(c => c.id === cat.id);
+              if (idx >= 0) {
+                merged[idx] = { ...merged[idx], ...cat };
+              } else {
+                merged.push(cat);
+              }
+            });
+          }
+          appData = { ...loaded, categories: merged };
         }
       } catch (e) {
-        console.warn("Could not load data.json, using baseline.", e);
+        console.warn("Could not load data.json, using defaults.", e);
       }
       renderCategoryPills();
       renderDashboard();
@@ -269,9 +290,7 @@
       if (!pillsContainer) return;
       pillsContainer.innerHTML = '';
 
-      const categories = appData.categories || [
-        { id: 'dairy', name: 'Doodh Ka Hisab (Dairy)', icon: '🥛', app_count: (appData.apps || []).length }
-      ];
+      const categories = (appData.categories && appData.categories.length > 0) ? appData.categories : DEFAULT_CATEGORIES;
 
       // Pill 1: All Categories
       const allCount = (appData.apps || []).length;
