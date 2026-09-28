@@ -1,4 +1,5 @@
 import os
+import json
 import datetime
 from pathlib import Path
 from typing import List, Dict, Any
@@ -281,11 +282,55 @@ def generate_root_readme():
         
     print(f"✅ Generated root README.md, apps/ ({len(apps)} files), and changes/!")
 
+def generate_web_dashboard_data():
+    """Exports data.json for the mobile-responsive GitHub Pages web app."""
+    stats = get_summary_stats()
+    apps = get_all_tracked_apps()
+    
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        
+        # Recent changes
+        cursor.execute("""
+            SELECT h.app_id, t.title, h.change_type, h.old_value, h.new_value, h.detected_at
+            FROM app_history h
+            LEFT JOIN tracked_apps t ON h.app_id = t.app_id
+            ORDER BY h.detected_at DESC
+            LIMIT 100
+        """)
+        changes = [dict(row) for row in cursor.fetchall()]
+        
+        # Recent detailed reviews
+        cursor.execute("""
+            SELECT r.review_id, r.app_id, t.title as app_title, r.user_name, r.score,
+                   r.content, r.review_created_at, r.thumbs_up_count, r.app_version,
+                   r.developer_reply, r.reply_date, r.detected_at
+            FROM reviews r
+            LEFT JOIN tracked_apps t ON r.app_id = t.app_id
+            ORDER BY r.detected_at DESC
+            LIMIT 500
+        """)
+        reviews = [dict(row) for row in cursor.fetchall()]
+
+    data = {
+        "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "stats": stats,
+        "apps": apps,
+        "changes": changes,
+        "reviews": reviews
+    }
+    
+    data_file = BASE_DIR / "data.json"
+    with open(data_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print("✅ Exported data.json for GitHub Pages mobile dashboard!")
+
 def build_github_documentation():
     ensure_dirs()
     generate_apps_section()
     generate_changes_section()
     generate_root_readme()
+    generate_web_dashboard_data()
 
 if __name__ == "__main__":
     build_github_documentation()

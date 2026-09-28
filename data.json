@@ -1,0 +1,13 @@
+{
+  "updated_at": "Ready to track",
+  "stats": {
+    "total_discovered": 0,
+    "pending_discovery": 0,
+    "actively_tracked": 0,
+    "total_reviews_captured": 0,
+    "total_updates_detected": 0
+  },
+  "apps": [],
+  "changes": [],
+  "reviews": []
+}
