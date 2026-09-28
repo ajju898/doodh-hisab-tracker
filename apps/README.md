@@ -1,14 +1,14 @@
 # 📱 Tracked Competitor Apps List
 
-Currently tracking **154 active apps** in the Doodh Ka Hisab / Dairy category.
+Currently tracking **155 active apps** in the Doodh Ka Hisab / Dairy category.
 
 | App Name | Developer | Rating ⭐ | Installs | Version | Launch Date | Last Updated | Details |
 |---|---|---|---|---|---|---|---|
-| [Country Delight Milk & Grocery](./app.mycountrydelight.in.countrydelight.md) | Country Delight | 4.499655 ⭐ | 10,000,000+ | `10.9.86` | Mar 9, 2016 | 1790435664 | [View Details](./app.mycountrydelight.in.countrydelight.md) |
+| [Country Delight Milk & Grocery](./app.mycountrydelight.in.countrydelight.md) | Country Delight | 4.4996843 ⭐ | 10,000,000+ | `10.9.86` | Mar 9, 2016 | 1790435664 | [View Details](./app.mycountrydelight.in.countrydelight.md) |
 | [bbdaily: Online Milk & Grocery](./com.raincan.android.hybrid.md) | Bigbasket.com | 4.16433 ⭐ | 10,000,000+ | `7.5.11` | Apr 18, 2015 | 1774277068 | [View Details](./com.raincan.android.hybrid.md) |
-| [Milkbasket: Grocery Delivery](./com.milkbasket.app.md) | Milkbasket | 4.15 ⭐ | 5,000,000+ | `9.0.7` | Mar 26, 2015 | 1790177357 | [View Details](./com.milkbasket.app.md) |
+| [Milkbasket: Grocery Delivery](./com.milkbasket.app.md) | Milkbasket | 4.149843 ⭐ | 5,000,000+ | `9.0.7` | Mar 26, 2015 | 1790177357 | [View Details](./com.milkbasket.app.md) |
 | [Remember The Milk](./com.rememberthemilk.MobileRTM.md) | Remember The Milk | 4.257426 ⭐ | 1,000,000+ | `4.11.2` | N/A | 1780963801 | [View Details](./com.rememberthemilk.MobileRTM.md) |
-| [Doodhvale Farms: Milk Delivery](./com.technologies.subtlelabs.doodhvale.md) | Doodhvale | 3.8448844 ⭐ | 1,000,000+ | `8.4.4` | Apr 17, 2017 | 1789548139 | [View Details](./com.technologies.subtlelabs.doodhvale.md) |
+| [Doodhvale Farms: Milk Delivery](./com.technologies.subtlelabs.doodhvale.md) | Doodhvale | 3.8445323 ⭐ | 1,000,000+ | `8.4.4` | Apr 17, 2017 | 1789548139 | [View Details](./com.technologies.subtlelabs.doodhvale.md) |
 | [Milk Farm Tycoon](./com.eastsidegames.milkinc.md) | East Side Games Studio | 3.72549 ⭐ | 500,000+ | `3.11.3` | Feb 7, 2023 | 1790330940 | [View Details](./com.eastsidegames.milkinc.md) |
 | [Milk Diary & Daily Grocery](./com.ProDataDoctor.MilkDiary.md) | Pro Data Doctor Pvt. Ltd. | 4.5720654 ⭐ | 100,000+ | `2.2` | Jan 28, 2020 | 1775732768 | [View Details](./com.ProDataDoctor.MilkDiary.md) |
 | [Mobile Dairy Center - Milk App](./dairy.mobile.com.mobiledairy.md) | Mobile Dairy Software | 4.824 ⭐ | 100,000+ | `4.1.3` | Nov 19, 2018 | 1787732514 | [View Details](./dairy.mobile.com.mobiledairy.md) |
@@ -158,3 +158,4 @@ Currently tracking **154 active apps** in the Doodh Ka Hisab / Dairy category.
 | [The Dairy Member App](./com.thedairymemberapp.md) | Pipasa Technologies LLP | 0.0 ⭐ | 1,000+ | `Varies with device` | Jan 30, 2025 | None | [View Details](./com.thedairymemberapp.md) |
 | [Daily Dairy](./com.journal.dairy.md) | DI Solutions | 0.0 ⭐ | 10,000+ | `Varies with device` | Sep 24, 2025 | None | [View Details](./com.journal.dairy.md) |
 | [Hisab Book : Your Digital Book](./com.hisabbook.sds.md) | D S SAVALIYA | 0.0 ⭐ | 100+ | `Varies with device` | Aug 19, 2026 | None | [View Details](./com.hisabbook.sds.md) |
+| [Doodh Setu](./com.dairyfresh.milkcollection.md) | Neodairy Sales & Services Pvt Ltd . | 0.0 ⭐ | 500+ | `Varies with device` | Mar 9, 2026 | None | [View Details](./com.dairyfresh.milkcollection.md) |

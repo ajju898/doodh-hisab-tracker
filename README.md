@@ -4,12 +4,12 @@
 
 ## 📊 Live Category Dashboard
 
-- 🔍 **Total Discovered Apps:** `154`
+- 🔍 **Total Discovered Apps:** `155`
 - ⏳ **Pending in Discovery Pool:** `0`
-- 🚀 **Actively Monitored Competitors:** `154`
-- 💬 **Total User Reviews Captured:** `1500`
+- 🚀 **Actively Monitored Competitors:** `155`
+- 💬 **Total User Reviews Captured:** `1779`
 - 🔄 **Total Updates & Changes Detected:** `0`
-- 🕒 **Last Monitored Cycle:** `2026-09-28 11:58:26`
+- 🕒 **Last Monitored Cycle:** `2026-09-28 12:29:36`
 
 ---
 
@@ -24,11 +24,11 @@
 
 | App Name | Developer | Rating ⭐ | Installs | Version | Details |
 |---|---|---|---|---|---|
-| [Country Delight Milk & Grocery](./apps/app.mycountrydelight.in.countrydelight.md) | Country Delight | 4.499655 ⭐ | 10,000,000+ | `10.9.86` | [Read Details](./apps/app.mycountrydelight.in.countrydelight.md) |
+| [Country Delight Milk & Grocery](./apps/app.mycountrydelight.in.countrydelight.md) | Country Delight | 4.4996843 ⭐ | 10,000,000+ | `10.9.86` | [Read Details](./apps/app.mycountrydelight.in.countrydelight.md) |
 | [bbdaily: Online Milk & Grocery](./apps/com.raincan.android.hybrid.md) | Bigbasket.com | 4.16433 ⭐ | 10,000,000+ | `7.5.11` | [Read Details](./apps/com.raincan.android.hybrid.md) |
-| [Milkbasket: Grocery Delivery](./apps/com.milkbasket.app.md) | Milkbasket | 4.15 ⭐ | 5,000,000+ | `9.0.7` | [Read Details](./apps/com.milkbasket.app.md) |
+| [Milkbasket: Grocery Delivery](./apps/com.milkbasket.app.md) | Milkbasket | 4.149843 ⭐ | 5,000,000+ | `9.0.7` | [Read Details](./apps/com.milkbasket.app.md) |
 | [Remember The Milk](./apps/com.rememberthemilk.MobileRTM.md) | Remember The Milk | 4.257426 ⭐ | 1,000,000+ | `4.11.2` | [Read Details](./apps/com.rememberthemilk.MobileRTM.md) |
-| [Doodhvale Farms: Milk Delivery](./apps/com.technologies.subtlelabs.doodhvale.md) | Doodhvale | 3.8448844 ⭐ | 1,000,000+ | `8.4.4` | [Read Details](./apps/com.technologies.subtlelabs.doodhvale.md) |
+| [Doodhvale Farms: Milk Delivery](./apps/com.technologies.subtlelabs.doodhvale.md) | Doodhvale | 3.8445323 ⭐ | 1,000,000+ | `8.4.4` | [Read Details](./apps/com.technologies.subtlelabs.doodhvale.md) |
 | [Milk Farm Tycoon](./apps/com.eastsidegames.milkinc.md) | East Side Games Studio | 3.72549 ⭐ | 500,000+ | `3.11.3` | [Read Details](./apps/com.eastsidegames.milkinc.md) |
 | [Milk Diary & Daily Grocery](./apps/com.ProDataDoctor.MilkDiary.md) | Pro Data Doctor Pvt. Ltd. | 4.5720654 ⭐ | 100,000+ | `2.2` | [Read Details](./apps/com.ProDataDoctor.MilkDiary.md) |
 | [Mobile Dairy Center - Milk App](./apps/dairy.mobile.com.mobiledairy.md) | Mobile Dairy Software | 4.824 ⭐ | 100,000+ | `4.1.3` | [Read Details](./apps/dairy.mobile.com.mobiledairy.md) |
@@ -40,7 +40,7 @@
 | [MCS - Dairy Billing App](./apps/com.milkcollectionsystem.md) | KANJI PATEL | 4.3381295 ⭐ | 100,000+ | `7.4.5` | [Read Details](./apps/com.milkcollectionsystem.md) |
 | [Dudh Dairy Hisab Dayri](./apps/com.umesh.patidar.sarkaridudhderi.md) | Umesh Patidar | 4.5503874 ⭐ | 50,000+ | `3.4.0` | [Read Details](./apps/com.umesh.patidar.sarkaridudhderi.md) |
 
-*(Showing top 15 of 154 apps. See full list in [**apps/README.md**](./apps/README.md))*
+*(Showing top 15 of 155 apps. See full list in [**apps/README.md**](./apps/README.md))*
 
 ---
 
