@@ -21,23 +21,23 @@ def generate_apps_section() -> str:
     apps = get_all_tracked_apps()
     
     # 1. Generate individual markdown files for each app
-    for app in apps:
-        app_id = app["app_id"]
-        title = app["title"]
-        developer = app["developer"]
-        score = app["score"] or 0.0
-        ratings_count = app["ratings_count"] or 0
-        reviews_count = app["reviews_count"] or 0
-        installs = app["installs"] or "N/A"
-        version = app["version"] or "N/A"
-        last_updated = app["last_updated"] or "N/A"
-        recent_changes = app["recent_changes"] or "No release notes provided."
-        description = app["description"] or "No description provided."
-        url = app["url"]
-        
-        # Fetch reviews for this app
-        with get_connection() as conn:
-            cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        for app in apps:
+            app_id = app["app_id"]
+            title = app["title"]
+            developer = app["developer"]
+            score = app["score"] or 0.0
+            ratings_count = app["ratings_count"] or 0
+            reviews_count = app["reviews_count"] or 0
+            installs = app["installs"] or "N/A"
+            version = app["version"] or "N/A"
+            last_updated = app["last_updated"] or "N/A"
+            recent_changes = app["recent_changes"] or "No release notes provided."
+            description = app["description"] or "No description provided."
+            url = app["url"]
+            
+            # Fetch reviews for this app
             cursor.execute("""
                 SELECT user_name, score, content, review_created_at
                 FROM reviews

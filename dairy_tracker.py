@@ -6,6 +6,7 @@ import csv
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Optional, List, Dict, Any
 
 # Configure logging
 logging.basicConfig(
@@ -63,24 +64,27 @@ def run_discovery() -> int:
     logger.info(f"✅ Discovery complete! {total_new} new apps discovered. Total pool: {stats['total_discovered']} ({stats['pending_discovery']} pending).")
     return total_new
 
-def run_add_daily_batch(limit: int = DAILY_NEW_APPS_LIMIT) -> int:
-    """Takes up to `limit` pending apps from the pool, fetches full data, and starts tracking them."""
+def run_add_daily_batch(limit: Optional[int] = None) -> int:
+    """Takes pending apps from the pool, fetches full data, and starts tracking them. If limit is None, tracks ALL."""
     pending = get_pending_apps_from_pool(limit=limit)
     if not pending:
         logger.info("ℹ️ No pending apps in the pool. All discovered apps are already being tracked!")
         return 0
 
-    logger.info(f"🚀 Promoting {len(pending)} apps from discovery pool to active 24/7 tracking...")
+    logger.info(f"🚀 Promoting ALL {len(pending)} apps from discovery pool to active 24/7 tracking...")
     added_apps = []
     
-    for item in pending:
+    for idx, item in enumerate(pending, start=1):
         app_id = item["app_id"]
-        logger.info(f"  Fetching details for: {item.get('title')} ({app_id})...")
-        details = fetch_full_app_details(app_id)
-        if details:
-            is_new, _ = upsert_tracked_app(details)
-            added_apps.append(details)
-        time.sleep(1)
+        logger.info(f"  [{idx}/{len(pending)}] Fetching details for: {item.get('title')} ({app_id})...")
+        try:
+            details = fetch_full_app_details(app_id)
+            if details:
+                is_new, _ = upsert_tracked_app(details)
+                added_apps.append(details)
+        except Exception as e:
+            logger.warning(f"  Failed to process {app_id}: {e}")
+        time.sleep(0.2)
 
     stats = get_summary_stats()
     if added_apps:
@@ -113,7 +117,7 @@ def run_scan_updates() -> int:
             logger.info(f"🚨 UPDATE DETECTED for '{title}': {len(changes)} changes found!")
             notify_app_update(title, app_id, changes, app_url)
             
-        time.sleep(0.5)
+        time.sleep(0.2)
         
     logger.info(f"✅ Update scan complete! {updates_found} apps had new updates.")
     return updates_found
@@ -132,16 +136,19 @@ def run_scan_reviews(max_reviews: int = MAX_REVIEWS_PER_CHECK) -> int:
         title = app["title"]
         app_url = app["url"]
         
-        reviews = fetch_latest_reviews(app_id, count=max_reviews)
-        for r in reviews:
-            is_new = record_review_if_new(app_id, r)
-            if is_new:
-                new_reviews_count += 1
-                logger.info(f"💬 New review on '{title}': {r.get('score')}⭐ by {r.get('userName')}")
-                notify_new_review(title, r, app_url)
-                time.sleep(0.3)
+        try:
+            reviews = fetch_latest_reviews(app_id, count=max_reviews)
+            for r in reviews:
+                is_new = record_review_if_new(app_id, r)
+                if is_new:
+                    new_reviews_count += 1
+                    logger.info(f"💬 New review on '{title}': {r.get('score')}⭐ by {r.get('userName')}")
+                    notify_new_review(title, r, app_url)
+                    time.sleep(0.2)
+        except Exception as e:
+            logger.warning(f"Error fetching reviews for {app_id}: {e}")
                 
-        time.sleep(0.5)
+        time.sleep(0.2)
         
     logger.info(f"✅ Review scan complete! {new_reviews_count} new reviews captured and alerted.")
     return new_reviews_count
@@ -168,16 +175,16 @@ def export_to_csv(filename: str = "dairy_competitors_list.csv"):
     logger.info(f"📁 Exported {len(tracked)} apps to {filepath.resolve()}")
 
 def run_full_cycle():
-    """Runs the complete automation loop: Discover -> Add daily batch -> Check updates -> Check reviews -> Report."""
+    """Runs the complete automation loop: Discover -> Track ALL apps -> Check updates -> Check reviews -> Report."""
     logger.info("==================================================")
     logger.info("🚀 RUNNING FULL COMPETITOR RADAR CYCLE")
     logger.info("==================================================")
     
-    # 1. Discover newly launched competitor apps
+    # 1. Discover all competitor apps from Play Store
     run_discovery()
     
-    # 2. Add daily batch of 10 apps to active tracking
-    run_add_daily_batch()
+    # 2. Add ALL discovered apps to active tracking (no 10-app limit)
+    run_add_daily_batch(limit=None)
     
     # 3. Check existing active apps for updates/changelogs
     run_scan_updates()
@@ -185,7 +192,7 @@ def run_full_cycle():
     # 4. Check for new customer reviews
     run_scan_reviews()
     
-    # 5. Send daily summary digest
+    # 5. Send summary digest to Telegram
     stats = get_summary_stats()
     notify_summary(stats)
     logger.info("🎉 Full cycle finished successfully!")

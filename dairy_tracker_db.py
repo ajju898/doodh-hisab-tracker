@@ -5,8 +5,9 @@ from typing import Dict, List, Optional, Tuple, Any
 from dairy_tracker_config import DATABASE_PATH
 
 def get_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = sqlite3.connect(DATABASE_PATH, timeout=30.0)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL;")
     return conn
 
 def init_db():
@@ -116,17 +117,25 @@ def add_to_discovered_pool(apps: List[Dict[str, Any]], keyword: str) -> int:
         conn.commit()
     return new_count
 
-def get_pending_apps_from_pool(limit: int = 10) -> List[Dict[str, Any]]:
-    """Fetches next batch of pending apps from the pool."""
+def get_pending_apps_from_pool(limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    """Fetches next batch of pending apps from the pool. If limit is None or <=0, fetches all."""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("""
-            SELECT app_id, title, developer, score, icon_url, search_keyword, discovered_at
-            FROM discovered_pool
-            WHERE status = 'pending'
-            ORDER BY score DESC, discovered_at ASC
-            LIMIT ?
-        """, (limit,))
+        if limit and limit > 0:
+            cursor.execute("""
+                SELECT app_id, title, developer, score, icon_url, search_keyword, discovered_at
+                FROM discovered_pool
+                WHERE status = 'pending'
+                ORDER BY score DESC, discovered_at ASC
+                LIMIT ?
+            """, (limit,))
+        else:
+            cursor.execute("""
+                SELECT app_id, title, developer, score, icon_url, search_keyword, discovered_at
+                FROM discovered_pool
+                WHERE status = 'pending'
+                ORDER BY score DESC, discovered_at ASC
+            """)
         return [dict(row) for row in cursor.fetchall()]
 
 def mark_as_tracked(app_id: str):
@@ -181,7 +190,7 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
                 now_str,
                 now_str
             ))
-            mark_as_tracked(app_id)
+            cursor.execute("UPDATE discovered_pool SET status = 'tracked' WHERE app_id = ?", (app_id,))
         else:
             # Check for version changes
             old_version = existing["version"]

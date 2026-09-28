@@ -93,22 +93,28 @@ def notify_new_review(app_title: str, review: Dict[str, Any], app_url: str):
     send_telegram_message("\n".join(lines))
 
 def notify_daily_batch_added(added_apps: List[Dict[str, Any]], remaining_pool_count: int):
-    """Sends a notification when daily 10 apps are promoted to active tracking."""
+    """Sends a notification when apps are promoted to active tracking."""
     lines = [
-        "🎯 <b>DAILY 10 COMPETITOR APPS ADDED TO MONITORING!</b>",
-        f"Added <b>{len(added_apps)}</b> new apps to active tracking.",
+        "🎯 <b>COMPETITOR APPS ADDED TO MONITORING!</b>",
+        f"Added <b>{len(added_apps)}</b> apps to active 24/7 tracking.",
         f"⏳ <b>{remaining_pool_count}</b> apps waiting in discovery pool.",
         "",
-        "<b>New Apps Tracked Today:</b>"
+        "<b>Top Apps Tracked:</b>"
     ]
     
-    for idx, app in enumerate(added_apps, start=1):
+    # Display up to 15 apps to stay well within Telegram's 4096 character limit
+    displayed = added_apps[:15]
+    for idx, app in enumerate(displayed, start=1):
         title = html.escape(app.get("title", "Unknown App"))
         score = app.get("score") or "N/A"
         installs = app.get("installs") or "N/A"
         app_id = app.get("app_id") or app.get("appId")
         url = app.get("url") or f"https://play.google.com/store/apps/details?id={app_id}"
         lines.append(f"{idx}. <a href=\"{url}\"><b>{title}</b></a> ({score}⭐ | {installs} installs)")
+        
+    if len(added_apps) > 15:
+        lines.append("")
+        lines.append(f"<i>...aur <b>{len(added_apps) - 15} aur apps</b> track ho rahe hain! (Poori list GitHub 'apps/' section me available hai).</i>")
         
     lines.append("")
     lines.append("⚡ <i>We are now monitoring updates & reviews for all these apps 24/7!</i>")
