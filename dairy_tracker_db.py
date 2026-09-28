@@ -38,9 +38,9 @@ def init_db():
                 score REAL,
                 ratings_count INTEGER,
                 reviews_count INTEGER,
-                installs TEXT,
                 version TEXT,
                 released TEXT DEFAULT '',
+                category TEXT DEFAULT 'dairy',
                 last_updated TEXT,
                 recent_changes TEXT,
                 description TEXT,
@@ -51,12 +51,25 @@ def init_db():
             )
         """)
         
-        # Check and add released column if table existed from earlier run
+        # Check and add columns if table existed from earlier run
         cursor.execute("PRAGMA table_info(tracked_apps)")
         tracked_cols = [row["name"] for row in cursor.fetchall()]
         if "released" not in tracked_cols:
             try:
                 cursor.execute("ALTER TABLE tracked_apps ADD COLUMN released TEXT DEFAULT ''")
+            except Exception:
+                pass
+        if "category" not in tracked_cols:
+            try:
+                cursor.execute("ALTER TABLE tracked_apps ADD COLUMN category TEXT DEFAULT 'dairy'")
+            except Exception:
+                pass
+
+        cursor.execute("PRAGMA table_info(discovered_pool)")
+        disc_cols = [row["name"] for row in cursor.fetchall()]
+        if "category" not in disc_cols:
+            try:
+                cursor.execute("ALTER TABLE discovered_pool ADD COLUMN category TEXT DEFAULT 'dairy'")
             except Exception:
                 pass
 
@@ -120,7 +133,7 @@ def init_db():
 
 # --- Discovery Pool Helpers ---
 
-def add_to_discovered_pool(apps: List[Dict[str, Any]], keyword: str) -> int:
+def add_to_discovered_pool(apps: List[Dict[str, Any]], keyword: str, category: str = "dairy") -> int:
     """Adds newly discovered apps to the pool if not already existing. Returns count of new apps."""
     new_count = 0
     with get_connection() as conn:
@@ -132,15 +145,16 @@ def add_to_discovered_pool(apps: List[Dict[str, Any]], keyword: str) -> int:
             cursor.execute("SELECT app_id FROM discovered_pool WHERE app_id = ?", (app_id,))
             if not cursor.fetchone():
                 cursor.execute("""
-                    INSERT INTO discovered_pool (app_id, title, developer, score, icon_url, search_keyword, status)
-                    VALUES (?, ?, ?, ?, ?, ?, 'pending')
+                    INSERT INTO discovered_pool (app_id, title, developer, score, icon_url, search_keyword, category, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
                 """, (
                     app_id,
                     app.get("title", ""),
                     app.get("developer", ""),
                     app.get("score") or 0.0,
                     app.get("icon", ""),
-                    keyword
+                    keyword,
+                    category
                 ))
                 new_count += 1
         conn.commit()
@@ -152,7 +166,7 @@ def get_pending_apps_from_pool(limit: Optional[int] = None) -> List[Dict[str, An
         cursor = conn.cursor()
         if limit and limit > 0:
             cursor.execute("""
-                SELECT app_id, title, developer, score, icon_url, search_keyword, discovered_at
+                SELECT app_id, title, developer, score, icon_url, search_keyword, category, discovered_at
                 FROM discovered_pool
                 WHERE status = 'pending'
                 ORDER BY score DESC, discovered_at ASC
@@ -160,7 +174,7 @@ def get_pending_apps_from_pool(limit: Optional[int] = None) -> List[Dict[str, An
             """, (limit,))
         else:
             cursor.execute("""
-                SELECT app_id, title, developer, score, icon_url, search_keyword, discovered_at
+                SELECT app_id, title, developer, score, icon_url, search_keyword, category, discovered_at
                 FROM discovered_pool
                 WHERE status = 'pending'
                 ORDER BY score DESC, discovered_at ASC
@@ -176,7 +190,7 @@ def mark_as_tracked(app_id: str):
 
 # --- Tracked Apps Management ---
 
-def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, Any]]]:
+def upsert_tracked_app(app_data: Dict[str, Any], category: Optional[str] = None) -> Tuple[bool, List[Dict[str, Any]]]:
     """
     Saves or updates app metadata.
     Returns:
@@ -184,6 +198,7 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
       changes: List of detected changes if it already existed.
     """
     app_id = app_data.get("appId") or app_data.get("app_id")
+    cat = category or app_data.get("category") or "dairy"
     changes = []
     is_new = False
     
@@ -199,9 +214,9 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
             cursor.execute("""
                 INSERT INTO tracked_apps (
                     app_id, title, developer, score, ratings_count, reviews_count,
-                    installs, version, released, last_updated, recent_changes, description,
+                    installs, version, released, category, last_updated, recent_changes, description,
                     url, icon_url, first_tracked_at, last_checked_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 app_id,
                 app_data.get("title", ""),
@@ -212,6 +227,7 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
                 str(app_data.get("installs", "0")),
                 str(app_data.get("version", "N/A")),
                 str(app_data.get("released", "") or ""),
+                cat,
                 str(app_data.get("updated", "")),
                 app_data.get("recentChanges", "") or "",
                 app_data.get("description", "") or "",
@@ -280,6 +296,7 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
                     installs = ?,
                     version = ?,
                     released = ?,
+                    category = ?,
                     last_updated = ?,
                     recent_changes = ?,
                     url = ?,
@@ -295,6 +312,7 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
                 str(app_data.get("installs", existing["installs"])),
                 new_version,
                 str(app_data.get("released") or existing["released"] or ""),
+                cat,
                 str(app_data.get("updated", existing["last_updated"])),
                 new_changelog or existing["recent_changes"],
                 app_data.get("url", existing["url"]),
@@ -306,11 +324,14 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
         conn.commit()
     return is_new, changes
 
-def get_all_tracked_apps() -> List[Dict[str, Any]]:
-    """Returns all currently tracked apps."""
+def get_all_tracked_apps(category: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Returns all currently tracked apps, optionally filtered by category."""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM tracked_apps ORDER BY ratings_count DESC")
+        if category and category != 'all':
+            cursor.execute("SELECT * FROM tracked_apps WHERE category = ? ORDER BY ratings_count DESC", (category,))
+        else:
+            cursor.execute("SELECT * FROM tracked_apps ORDER BY ratings_count DESC")
         return [dict(row) for row in cursor.fetchall()]
 
 # --- Review Helpers ---

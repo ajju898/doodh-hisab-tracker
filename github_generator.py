@@ -285,17 +285,30 @@ def generate_root_readme():
         
     print(f"✅ Generated root README.md, apps/ ({len(apps)} files), and changes/!")
 
+from dairy_tracker_config import CATEGORIES
+
 def generate_web_dashboard_data():
     """Exports data.json for the mobile-responsive GitHub Pages web app."""
     stats = get_summary_stats()
     apps = get_all_tracked_apps()
     
+    # Generate categories overview
+    categories_list = []
+    for cat_id, cat_info in CATEGORIES.items():
+        count = sum(1 for a in apps if a.get("category") == cat_id)
+        categories_list.append({
+            "id": cat_id,
+            "name": cat_info.get("name", cat_id),
+            "icon": cat_info.get("icon", "📱"),
+            "app_count": count
+        })
+        
     with get_connection() as conn:
         cursor = conn.cursor()
         
         # Recent changes
         cursor.execute("""
-            SELECT h.app_id, t.title, h.change_type, h.old_value, h.new_value, h.detected_at
+            SELECT h.app_id, t.title, t.category, h.change_type, h.old_value, h.new_value, h.detected_at
             FROM app_history h
             LEFT JOIN tracked_apps t ON h.app_id = t.app_id
             ORDER BY h.detected_at DESC
@@ -305,7 +318,7 @@ def generate_web_dashboard_data():
         
         # Recent detailed reviews
         cursor.execute("""
-            SELECT r.review_id, r.app_id, t.title as app_title, r.user_name, r.score,
+            SELECT r.review_id, r.app_id, t.title as app_title, t.category, r.user_name, r.score,
                    r.content, r.review_created_at, r.thumbs_up_count, r.app_version,
                    r.developer_reply, r.reply_date, r.detected_at
             FROM reviews r
@@ -318,6 +331,7 @@ def generate_web_dashboard_data():
     data = {
         "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "stats": stats,
+        "categories": categories_list,
         "apps": apps,
         "changes": changes,
         "reviews": reviews
@@ -326,7 +340,7 @@ def generate_web_dashboard_data():
     data_file = BASE_DIR / "data.json"
     with open(data_file, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    print("✅ Exported data.json for GitHub Pages mobile dashboard!")
+    print("✅ Exported data.json with multi-category support for GitHub Pages!")
 
 def build_github_documentation():
     ensure_dirs()

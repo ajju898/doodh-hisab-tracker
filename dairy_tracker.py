@@ -17,6 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger("DairyTracker")
 
 from dairy_tracker_config import (
+    CATEGORIES,
     TARGET_KEYWORDS,
     DAILY_NEW_APPS_LIMIT,
     CHECK_INTERVAL_HOURS,
@@ -52,16 +53,23 @@ from playstore_service import (
 )
 
 def run_discovery() -> int:
-    """Scans all dairy/milk keywords on Play Store and pools candidate apps."""
-    logger.info("🔎 Starting Play Store keyword discovery for 'Doodh ka Hisab' apps...")
+    """Scans keywords on Play Store across all configured categories and pools candidate apps."""
+    logger.info(f"🔎 Starting Play Store keyword discovery across {len(CATEGORIES)} categories...")
     total_new = 0
-    for kw in TARGET_KEYWORDS:
-        logger.info(f"  Searching keyword: '{kw}'...")
-        apps = search_playstore(kw, n_hits=40)
-        new_count = add_to_discovered_pool(apps, kw)
-        logger.info(f"  Found {len(apps)} apps matching keyword ({new_count} newly added to pool).")
-        total_new += new_count
-        time.sleep(1) # Be gentle with Play Store requests
+    for cat_id, cat_info in CATEGORIES.items():
+        cat_name = cat_info.get("name", cat_id)
+        keywords = cat_info.get("keywords", [])
+        logger.info(f"📂 Scanning category: '{cat_name}' ({len(keywords)} keywords)...")
+        for kw in keywords:
+            logger.info(f"  Searching keyword: '{kw}'...")
+            try:
+                apps = search_playstore(kw, n_hits=40)
+                new_count = add_to_discovered_pool(apps, kw, category=cat_id)
+                logger.info(f"  Found {len(apps)} apps matching '{kw}' ({new_count} newly added to pool).")
+                total_new += new_count
+            except Exception as e:
+                logger.warning(f"Error searching '{kw}': {e}")
+            time.sleep(0.5)
         
     stats = get_summary_stats()
     logger.info(f"✅ Discovery complete! {total_new} new apps discovered. Total pool: {stats['total_discovered']} ({stats['pending_discovery']} pending).")
@@ -79,11 +87,13 @@ def run_add_daily_batch(limit: Optional[int] = None) -> int:
     
     for idx, item in enumerate(pending, start=1):
         app_id = item["app_id"]
-        logger.info(f"  [{idx}/{len(pending)}] Fetching details for: {item.get('title')} ({app_id})...")
+        cat = item.get("category") or "dairy"
+        logger.info(f"  [{idx}/{len(pending)}] Fetching details for: {item.get('title')} ({app_id}) [{cat}]...")
         try:
             details = fetch_full_app_details(app_id)
             if details:
-                is_new, _ = upsert_tracked_app(details)
+                is_new, _ = upsert_tracked_app(details, category=cat)
+                details["category"] = cat
                 added_apps.append(details)
         except Exception as e:
             logger.warning(f"  Failed to process {app_id}: {e}")

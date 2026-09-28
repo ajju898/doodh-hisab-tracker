@@ -56,6 +56,17 @@
   <!-- Main Container -->
   <main class="max-w-6xl mx-auto px-4 py-4 space-y-5">
 
+    <!-- Category Switcher Pill Bar -->
+    <div class="space-y-1.5">
+      <div class="flex items-center justify-between text-xs">
+        <span class="font-extrabold uppercase tracking-wider text-slate-500 text-[10px]">Active Category:</span>
+        <span id="activeCategoryLabel" class="text-blue-600 font-extrabold text-[11px]">All Categories</span>
+      </div>
+      <div id="categoryPills" class="flex items-center space-x-2 overflow-x-auto pb-1 text-xs font-bold scrollbar-none">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
     <!-- KPI Dashboard Cards -->
     <div class="grid grid-cols-3 gap-2.5 sm:gap-4">
       <div class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200/80 shadow-sm flex flex-col justify-between">
@@ -238,6 +249,7 @@
 
     let currentTab = 'apps';
     let currentReviewFilter = 'all';
+    let currentCategory = 'all';
 
     async function loadData() {
       try {
@@ -248,26 +260,88 @@
       } catch (e) {
         console.warn("Could not load data.json, using baseline.", e);
       }
+      renderCategoryPills();
       renderDashboard();
     }
 
+    function renderCategoryPills() {
+      const pillsContainer = document.getElementById('categoryPills');
+      if (!pillsContainer) return;
+      pillsContainer.innerHTML = '';
+
+      const categories = appData.categories || [
+        { id: 'dairy', name: 'Doodh Ka Hisab (Dairy)', icon: '🥛', app_count: (appData.apps || []).length }
+      ];
+
+      // Pill 1: All Categories
+      const allCount = (appData.apps || []).length;
+      const allBtn = document.createElement('button');
+      allBtn.onclick = () => switchCategory('all');
+      allBtn.className = `px-3.5 py-1.5 rounded-full flex items-center space-x-1.5 whitespace-nowrap transition text-xs font-bold ${
+        currentCategory === 'all'
+          ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
+          : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+      }`;
+      allBtn.innerHTML = `<span>🌐</span><span>All Categories (${allCount})</span>`;
+      pillsContainer.appendChild(allBtn);
+
+      // Dynamic Categories from categories.json
+      categories.forEach(cat => {
+        const catCount = (appData.apps || []).filter(a => (a.category || 'dairy') === cat.id).length || cat.app_count || 0;
+        const btn = document.createElement('button');
+        btn.onclick = () => switchCategory(cat.id);
+        btn.className = `px-3.5 py-1.5 rounded-full flex items-center space-x-1.5 whitespace-nowrap transition text-xs font-bold ${
+          currentCategory === cat.id
+            ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
+            : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+        }`;
+        btn.innerHTML = `<span>${cat.icon || '📱'}</span><span>${cat.name} (${catCount})</span>`;
+        pillsContainer.appendChild(btn);
+      });
+    }
+
+    function switchCategory(catId) {
+      currentCategory = catId;
+      const categories = appData.categories || [];
+      const found = categories.find(c => c.id === catId);
+      document.getElementById('activeCategoryLabel').innerText = found ? `${found.icon} ${found.name}` : 'All Categories';
+      renderCategoryPills();
+      renderDashboard();
+    }
+
+    function getFilteredData() {
+      let filteredApps = appData.apps || [];
+      let filteredChanges = appData.changes || [];
+      let filteredReviews = appData.reviews || [];
+
+      if (currentCategory !== 'all') {
+        filteredApps = filteredApps.filter(a => (a.category || 'dairy') === currentCategory);
+        filteredChanges = filteredChanges.filter(c => (c.category || 'dairy') === currentCategory);
+        filteredReviews = filteredReviews.filter(r => (r.category || 'dairy') === currentCategory);
+      }
+
+      return { filteredApps, filteredChanges, filteredReviews };
+    }
+
     function renderDashboard() {
+      const { filteredApps, filteredChanges, filteredReviews } = getFilteredData();
+
       // Stats
-      document.getElementById('statTotalApps').innerText = appData.apps ? appData.apps.length : 0;
-      document.getElementById('statTotalUpdates').innerText = appData.changes ? appData.changes.length : 0;
-      document.getElementById('statTotalReviews').innerText = appData.reviews ? appData.reviews.length : 0;
+      document.getElementById('statTotalApps').innerText = filteredApps.length;
+      document.getElementById('statTotalUpdates').innerText = filteredChanges.length;
+      document.getElementById('statTotalReviews').innerText = filteredReviews.length;
       
-      document.getElementById('tabCountApps').innerText = appData.apps ? appData.apps.length : 0;
-      document.getElementById('tabCountChanges').innerText = appData.changes ? appData.changes.length : 0;
-      document.getElementById('tabCountReviews').innerText = appData.reviews ? appData.reviews.length : 0;
+      document.getElementById('tabCountApps').innerText = filteredApps.length;
+      document.getElementById('tabCountChanges').innerText = filteredChanges.length;
+      document.getElementById('tabCountReviews').innerText = filteredReviews.length;
 
       if (appData.updated_at) {
         document.getElementById('lastUpdatedHeader').innerText = 'Updated: ' + appData.updated_at.slice(0, 16);
       }
 
-      renderApps(appData.apps);
-      renderChanges(appData.changes);
-      renderReviews(appData.reviews);
+      renderApps(filteredApps);
+      renderChanges(filteredChanges);
+      renderReviews(filteredReviews);
     }
 
     function renderApps(apps) {
@@ -442,8 +516,9 @@
     }
 
     function filterApps() {
+      const { filteredApps } = getFilteredData();
       const q = document.getElementById('searchInput').value.toLowerCase().trim();
-      const filtered = (appData.apps || []).filter(a => 
+      const filtered = filteredApps.filter(a => 
         (a.title || '').toLowerCase().includes(q) ||
         (a.developer || '').toLowerCase().includes(q) ||
         (a.app_id || '').toLowerCase().includes(q)
@@ -452,8 +527,9 @@
     }
 
     function sortApps() {
+      const { filteredApps } = getFilteredData();
       const sortBy = document.getElementById('sortSelect').value;
-      const sorted = [...(appData.apps || [])];
+      const sorted = [...filteredApps];
       if (sortBy === 'launched_desc') {
         sorted.sort((a, b) => new Date(b.released || 0) - new Date(a.released || 0));
       } else if (sortBy === 'launched_asc') {

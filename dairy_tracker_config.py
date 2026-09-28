@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -7,6 +8,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 DATABASE_PATH = BASE_DIR / "dairy_competitors.db"
+CATEGORIES_FILE = BASE_DIR / "categories.json"
 
 # Telegram Settings
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
@@ -23,19 +25,38 @@ CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "4"))
 PLAYSTORE_COUNTRY = "in"
 PLAYSTORE_LANG = "en"
 
-# Search keywords to find all "Doodh ka Hisab" / Dairy Apps in India
-TARGET_KEYWORDS = [
-    "doodh ka hisab",
-    "doodh diary",
-    "milk record",
-    "dairy milk ledger",
-    "dairy hisab kitab",
-    "daily milk record",
-    "milk delivery tracker",
-    "dairy management",
-    "milk collection",
-    "dairy farm management",
-    "milk customer ledger",
-    "gwala dairy",
-    "doodh hisab book",
-]
+def load_categories():
+    """Loads custom categories and their search keywords from categories.json."""
+    if CATEGORIES_FILE.exists():
+        try:
+            with open(CATEGORIES_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {
+        "dairy": {
+            "name": "Doodh Ka Hisab (Dairy)",
+            "icon": "🥛",
+            "keywords": [
+                "doodh ka hisab",
+                "doodh diary",
+                "milk record",
+                "dairy milk ledger",
+                "dairy hisab kitab",
+                "daily milk record",
+                "milk delivery tracker",
+                "dairy management",
+                "milk collection",
+                "dairy farm management",
+                "gwala dairy",
+                "doodh hisab book"
+            ]
+        }
+    }
+
+CATEGORIES = load_categories()
+
+# Flat list of keywords for backwards compatibility
+TARGET_KEYWORDS = []
+for cat_id, cat_info in CATEGORIES.items():
+    TARGET_KEYWORDS.extend(cat_info.get("keywords", []))
