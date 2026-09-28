@@ -104,6 +104,8 @@
         </div>
         <select id="sortSelect" onchange="sortApps()" class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="score">Sort: Highest Rating ⭐</option>
+          <option value="launched_desc">Sort: Newest Launch 🚀 (Nayi Apps Pehle)</option>
+          <option value="launched_asc">Sort: Oldest Launch 🏛️ (Purani Apps Pehle)</option>
           <option value="ratings">Sort: Most Reviews 💬</option>
           <option value="title">Sort: Name (A-Z)</option>
         </select>
@@ -113,8 +115,12 @@
       <div id="appsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         <!-- Apps injected via JS -->
       </div>
-      <div id="noAppsMessage" class="hidden text-center py-12 text-slate-400">
-        No apps match your search filter.
+      <div id="noAppsMessage" class="hidden text-center py-16 px-4">
+        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-3">⏳</div>
+        <h3 class="text-base font-bold text-slate-800">No Apps Loaded Yet</h3>
+        <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+          GitHub Actions tab me jakar <b>"Run workflow"</b> button dabayein. Workflow run hote hi Play Store se saare 154+ apps yahan live aa jayenge!
+        </p>
       </div>
     </section>
 
@@ -172,7 +178,7 @@
       <div class="p-5 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700">
         
         <!-- Metadata Badges -->
-        <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
           <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">
             <span class="text-[10px] text-slate-400 uppercase font-bold block">Rating</span>
             <span id="modalScore" class="font-extrabold text-slate-800 text-sm">4.5 ⭐</span>
@@ -184,6 +190,10 @@
           <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">
             <span class="text-[10px] text-slate-400 uppercase font-bold block">Installs</span>
             <span id="modalInstalls" class="font-extrabold text-slate-800 text-sm">50K+</span>
+          </div>
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Launched</span>
+            <span id="modalReleased" class="font-extrabold text-slate-800 text-xs truncate">N/A</span>
           </div>
         </div>
 
@@ -298,6 +308,11 @@
                   <span class="inline-flex items-center text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg">
                     📥 ${app.installs || 'N/A'}
                   </span>
+                  ${app.released ? `
+                    <span class="inline-flex items-center text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200/50">
+                      🚀 ${app.released}
+                    </span>
+                  ` : ''}
                 </div>
               </div>
             </div>
@@ -377,33 +392,50 @@
 
       filtered.forEach(r => {
         const item = document.createElement('div');
-        item.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2 text-xs";
+        item.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2.5 text-xs overflow-hidden";
         
         const stars = '⭐'.repeat(r.score || 1);
         const thumbs = r.thumbs_up_count ? `👍 ${r.thumbs_up_count} helpful` : '';
-        const version = r.app_version ? `(on v${r.app_version})` : '';
+        const version = r.app_version ? `(v${r.app_version})` : '';
 
         item.innerHTML = `
-          <div class="flex items-start justify-between">
-            <div>
-              <span class="font-bold text-slate-900">${r.app_title || r.app_id}</span>
-              <p class="text-[11px] text-slate-500">${r.user_name || 'Anonymous'} ${version}</p>
+          <!-- Prominent App Header Banner -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 -mx-4 -mt-4 p-3 rounded-t-2xl border-b border-blue-100 flex items-center justify-between">
+            <div class="flex items-center space-x-2 min-w-0">
+              <span class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-xs flex-shrink-0">📱</span>
+              <div class="min-w-0">
+                <span class="text-[9px] uppercase tracking-wider font-extrabold text-blue-600 block">Review for App:</span>
+                <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm truncate" title="${r.app_title || r.app_id}">${r.app_title || r.app_id}</h4>
+              </div>
             </div>
-            <div class="text-right">
-              <span class="text-amber-500 font-bold">${stars}</span>
-              <p class="text-[10px] text-slate-400">${(r.review_created_at || '').slice(0, 10)}</p>
+            <div class="text-right flex-shrink-0">
+              <span class="text-amber-500 font-extrabold bg-white px-2 py-0.5 rounded-lg border border-amber-200 text-xs shadow-xs">${stars}</span>
             </div>
           </div>
-          <p class="text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs italic">
-            "${r.content || 'No text'}"
+
+          <!-- Reviewer Info & Date -->
+          <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+            <span class="font-semibold text-slate-700">👤 ${r.user_name || 'Anonymous'} <span class="text-slate-400 font-normal">${version}</span></span>
+            <span>🕒 ${(r.review_created_at || '').slice(0, 10)}</span>
+          </div>
+
+          <!-- Review Content -->
+          <p class="text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-200/70 text-xs leading-relaxed italic">
+            "${r.content || 'No text review'}"
           </p>
+
+          <!-- Developer Reply if any -->
           ${r.developer_reply ? `
-            <div class="bg-blue-50/70 p-2.5 rounded-xl border border-blue-100 text-blue-900 text-[11px]">
-              <span class="font-bold">👨‍💻 Developer Reply (${(r.reply_date || '').slice(0, 10)}):</span>
-              <p class="mt-0.5">${r.developer_reply}</p>
+            <div class="bg-emerald-50/80 p-2.5 rounded-xl border border-emerald-200 text-emerald-950 text-[11px]">
+              <span class="font-bold flex items-center space-x-1">
+                <span>👨‍💻 Developer Reply</span>
+                <span class="text-[10px] text-emerald-600 font-normal">(${(r.reply_date || '').slice(0, 10)})</span>
+              </span>
+              <p class="mt-1">${r.developer_reply}</p>
             </div>
           ` : ''}
-          ${thumbs ? `<div class="text-[10px] text-slate-400 font-semibold">${thumbs}</div>` : ''}
+
+          ${thumbs ? `<div class="text-[10px] text-slate-400 font-medium">${thumbs}</div>` : ''}
         `;
         feed.appendChild(item);
       });
@@ -422,7 +454,11 @@
     function sortApps() {
       const sortBy = document.getElementById('sortSelect').value;
       const sorted = [...(appData.apps || [])];
-      if (sortBy === 'score') {
+      if (sortBy === 'launched_desc') {
+        sorted.sort((a, b) => new Date(b.released || 0) - new Date(a.released || 0));
+      } else if (sortBy === 'launched_asc') {
+        sorted.sort((a, b) => new Date(a.released || '9999-12-31') - new Date(b.released || '9999-12-31'));
+      } else if (sortBy === 'score') {
         sorted.sort((a, b) => (b.score || 0) - (a.score || 0));
       } else if (sortBy === 'ratings') {
         sorted.sort((a, b) => (b.ratings_count || 0) - (a.ratings_count || 0));
@@ -463,6 +499,7 @@
       document.getElementById('modalScore').innerText = `${(app.score || 0).toFixed(1)} ⭐`;
       document.getElementById('modalVersion').innerText = app.version || 'N/A';
       document.getElementById('modalInstalls').innerText = app.installs || 'N/A';
+      document.getElementById('modalReleased').innerText = app.released || 'N/A';
       document.getElementById('modalWhatsNew').innerText = (app.recent_changes || '').trim() || 'No recent changelog notes provided by developer.';
       document.getElementById('modalDescription').innerText = app.description || 'No description available.';
       document.getElementById('modalPlayStoreLink').href = app.url || `https://play.google.com/store/apps/details?id=${app.app_id}`;

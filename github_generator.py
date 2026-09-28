@@ -58,6 +58,7 @@ def generate_apps_section() -> str:
             """, (app_id,))
             history_rows = cursor.fetchall()
             
+        released = app.get("released") or "N/A"
         app_md_content = [
             f"# 📱 {title}",
             "",
@@ -66,6 +67,7 @@ def generate_apps_section() -> str:
             f"- **Rating:** ⭐ {score} ({ratings_count:,} ratings | {reviews_count:,} reviews)",
             f"- **Installs:** {installs}",
             f"- **Current Version:** `{version}`",
+            f"- **Initial Launch Date:** {released}",
             f"- **Last Updated Date:** {last_updated}",
             f"- **Play Store Link:** [Open in Google Play]({url})",
             "",
@@ -124,8 +126,8 @@ def generate_apps_section() -> str:
         "",
         f"Currently tracking **{len(apps)} active apps** in the Doodh Ka Hisab / Dairy category.",
         "",
-        "| App Name | Developer | Rating ⭐ | Installs | Version | Last Updated | Details |",
-        "|---|---|---|---|---|---|---|"
+        "| App Name | Developer | Rating ⭐ | Installs | Version | Launch Date | Last Updated | Details |",
+        "|---|---|---|---|---|---|---|---|"
     ]
     for app in apps:
         title = app["title"].replace("|", "-")
@@ -133,10 +135,11 @@ def generate_apps_section() -> str:
         score = app["score"] or 0.0
         installs = app["installs"] or "N/A"
         version = app["version"] or "N/A"
+        rel_date = app.get("released") or "N/A"
         updated = str(app["last_updated"])[:10]
         app_id = app["app_id"]
         detail_link = f"[{title}](./{app_id}.md)"
-        master_lines.append(f"| {detail_link} | {dev} | {score} ⭐ | {installs} | `{version}` | {updated} | [View Details](./{app_id}.md) |")
+        master_lines.append(f"| {detail_link} | {dev} | {score} ⭐ | {installs} | `{version}` | {rel_date} | {updated} | [View Details](./{app_id}.md) |")
         
     master_file = APPS_DIR / "README.md"
     with open(master_file, "w", encoding="utf-8") as f:

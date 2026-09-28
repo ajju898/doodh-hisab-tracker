@@ -40,6 +40,7 @@ def init_db():
                 reviews_count INTEGER,
                 installs TEXT,
                 version TEXT,
+                released TEXT DEFAULT '',
                 last_updated TEXT,
                 recent_changes TEXT,
                 description TEXT,
@@ -50,6 +51,15 @@ def init_db():
             )
         """)
         
+        # Check and add released column if table existed from earlier run
+        cursor.execute("PRAGMA table_info(tracked_apps)")
+        tracked_cols = [row["name"] for row in cursor.fetchall()]
+        if "released" not in tracked_cols:
+            try:
+                cursor.execute("ALTER TABLE tracked_apps ADD COLUMN released TEXT DEFAULT ''")
+            except Exception:
+                pass
+
         # 3. History of changes (version upgrade, changelog change, score shift)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS app_history (
@@ -189,9 +199,9 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
             cursor.execute("""
                 INSERT INTO tracked_apps (
                     app_id, title, developer, score, ratings_count, reviews_count,
-                    installs, version, last_updated, recent_changes, description,
+                    installs, version, released, last_updated, recent_changes, description,
                     url, icon_url, first_tracked_at, last_checked_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 app_id,
                 app_data.get("title", ""),
@@ -201,6 +211,7 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
                 app_data.get("reviews", 0),
                 str(app_data.get("installs", "0")),
                 str(app_data.get("version", "N/A")),
+                str(app_data.get("released", "") or ""),
                 str(app_data.get("updated", "")),
                 app_data.get("recentChanges", "") or "",
                 app_data.get("description", "") or "",
@@ -268,6 +279,7 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
                     reviews_count = ?,
                     installs = ?,
                     version = ?,
+                    released = ?,
                     last_updated = ?,
                     recent_changes = ?,
                     url = ?,
@@ -282,6 +294,7 @@ def upsert_tracked_app(app_data: Dict[str, Any]) -> Tuple[bool, List[Dict[str, A
                 app_data.get("reviews", existing["reviews_count"]),
                 str(app_data.get("installs", existing["installs"])),
                 new_version,
+                str(app_data.get("released") or existing["released"] or ""),
                 str(app_data.get("updated", existing["last_updated"])),
                 new_changelog or existing["recent_changes"],
                 app_data.get("url", existing["url"]),
