@@ -1,0 +1,18 @@
+# Environment variables & secrets (Never commit!)
+.env
+.env.local
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# OS specific
+.DS_Store
+Thumbs.db
